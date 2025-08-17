@@ -51,8 +51,8 @@
             #rotate-message { display: none; }
         }
     </style>
-    <!-- Using the latest stable version of Ruffle -->
-    <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
+    <!-- Using a specific older version of Ruffle known for better compatibility -->
+    <script src="https://unpkg.com/@ruffle-rs/ruffle@0.1.0-nightly.2023.03.08/ruffle.js"></script>
 </head>
 <body>
     <div id="rotate-message">
@@ -66,23 +66,21 @@
         window.RufflePlayer = window.RufflePlayer || {};
         window.addEventListener("load", () => {
             window.RufflePlayer.config = {
-                // Autoplay the content
-                autoplay: "on",
-                // Better mobile support
+                autoplay: "auto",
                 unmuteOverlay: "hidden",
-                // More stable loading
-                maxExecutionDuration: 15,
-                // Better quality
+                maxExecutionDuration: 120,
                 quality: "high",
-                // Mobile optimization
-                letterbox: "on",
-                // Allow script access
+                letterbox: "off",
                 allowScriptAccess: "always",
-                // Set background
                 backgroundColor: "#000000",
-                // Scale settings
-                scale: "showAll",
-                salign: "tm"
+                wmode: "direct",
+                scale: "exactfit",
+                forceScale: true,
+                logLevel: "error",
+                showSwfDownload: false,
+                contextMenu: false,
+                upgradeToHttps: true,
+                preloader: false
             };
             
             // Create and configure the player
@@ -91,13 +89,46 @@
             const container = document.getElementById("ruffle-player");
             container.appendChild(player);
             
-            // Load the SWF
-            player.load("swf/Mama Vana.swf").catch(console.error);
+            // Configure player size
+            player.style.width = '100%';
+            player.style.height = '100%';
             
-            // Add error handling
+            // Load the SWF with a slight delay to ensure proper initialization
+            setTimeout(() => {
+                player.load({
+                    url: "swf/Mama Vana.swf",
+                    parameters: {
+                        allowScriptAccess: true,
+                        base: ".",
+                        menu: false,
+                        quality: "high",
+                        bgcolor: "#000000"
+                    }
+                }).catch((e) => {
+                    console.error("Loading error:", e);
+                    // Try reloading once if there's an error
+                    setTimeout(() => {
+                        player.load("swf/Mama Vana.swf").catch(console.error);
+                    }, 1000);
+                });
+            }, 500);
+            
+            // Add error handling and loading monitoring
             player.addEventListener('error', (e) => {
                 console.error("Ruffle error:", e);
             });
+            
+            player.addEventListener('loadProgress', (e) => {
+                console.log("Loading progress:", e.detail);
+            });
+            
+            // Force reload if stuck for too long
+            setTimeout(() => {
+                if (document.querySelector("#ruffle-player").innerHTML.includes("Loading")) {
+                    console.log("Attempting reload due to long load time...");
+                    player.load("swf/Mama Vana.swf");
+                }
+            }, 10000);
         });
         
         // Check if Ruffle is supported
