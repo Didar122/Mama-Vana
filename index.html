@@ -34,10 +34,11 @@
             font-size: 24px;
         }
 
-        embed {
-            max-width: 100%;
-            max-height: 100vh;
-            aspect-ratio: 4/3;
+        #ruffle-player {
+            width: 100%;
+            height: 100%;
+            max-width: 800px;
+            max-height: 600px;
         }
 
         @media (orientation: portrait) {
@@ -50,24 +51,64 @@
             #rotate-message { display: none; }
         }
     </style>
-    <script src="https://unpkg.com/@ruffle-rs/ruffle@0.1.0-nightly.2023.08.15/ruffle.js"></script>
+    <!-- Using the latest stable version of Ruffle -->
+    <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
 </head>
 <body>
     <div id="rotate-message">
         Please rotate your device to landscape mode to play
     </div>
     <div id="game-container">
-        <embed
-            src="swf/Mama Vana.swf"
-            width="800"
-            height="600"
-            quality="high"
-            bgcolor="#000000"
-            allowscriptaccess="always"
-            allowfullscreen="true"
-            wmode="direct"
-            scale="showall"
-        />
+        <div id="ruffle-player"></div>
     </div>
+
+    <script>
+        window.RufflePlayer = window.RufflePlayer || {};
+        window.addEventListener("load", () => {
+            window.RufflePlayer.config = {
+                // Autoplay the content
+                autoplay: "on",
+                // Better mobile support
+                unmuteOverlay: "hidden",
+                // More stable loading
+                maxExecutionDuration: 15,
+                // Better quality
+                quality: "high",
+                // Mobile optimization
+                letterbox: "on",
+                // Allow script access
+                allowScriptAccess: "always",
+                // Set background
+                backgroundColor: "#000000",
+                // Scale settings
+                scale: "showAll",
+                salign: "tm"
+            };
+            
+            // Create and configure the player
+            const ruffle = window.RufflePlayer.newest();
+            const player = ruffle.createPlayer();
+            const container = document.getElementById("ruffle-player");
+            container.appendChild(player);
+            
+            // Load the SWF
+            player.load("swf/Mama Vana.swf").catch(console.error);
+            
+            // Add error handling
+            player.addEventListener('error', (e) => {
+                console.error("Ruffle error:", e);
+            });
+        });
+        
+        // Check if Ruffle is supported
+        if (typeof window.RufflePlayer === "undefined") {
+            const errorMessage = document.createElement("div");
+            errorMessage.style.color = "white";
+            errorMessage.style.textAlign = "center";
+            errorMessage.style.padding = "20px";
+            errorMessage.innerHTML = "Ruffle failed to load. Please check if your browser supports WebAssembly.";
+            document.body.appendChild(errorMessage);
+        }
+    </script>
 </body>
 </html>
