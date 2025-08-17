@@ -9,7 +9,7 @@
             margin: 0;
             padding: 0;
             width: 100%;
-            height: 100%;
+            height: 100vh;
             background-color: #000;
             display: flex;
             justify-content: center;
@@ -18,11 +18,10 @@
         }
 
         #game-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            width: 800px;
+            height: 600px;
+            position: relative;
+            background: #000;
         }
 
         #rotate-message {
@@ -32,13 +31,25 @@
             font-family: Arial, sans-serif;
             padding: 20px;
             font-size: 24px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            z-index: 1000;
         }
 
-        #ruffle-player {
+        embed {
             width: 100%;
             height: 100%;
-            max-width: 800px;
-            max-height: 600px;
+        }
+
+        @media (max-width: 800px) {
+            #game-container {
+                width: 100vw;
+                height: 75vw;
+                max-height: 100vh;
+            }
         }
 
         @media (orientation: portrait) {
@@ -47,88 +58,41 @@
         }
 
         @media (orientation: landscape) {
-            #game-container { display: flex; }
+            #game-container { display: block; }
             #rotate-message { display: none; }
         }
     </style>
-    <!-- Using a specific older version of Ruffle known for better compatibility -->
-    <script src="https://unpkg.com/@ruffle-rs/ruffle@0.1.0-nightly.2023.03.08/ruffle.js"></script>
+    <script src="https://unpkg.com/@ruffle-rs/ruffle@0.1.0-nightly.2023.08.15/ruffle.js"></script>
 </head>
 <body>
     <div id="rotate-message">
         Please rotate your device to landscape mode to play
     </div>
-    <div id="game-container">
-        <div id="ruffle-player"></div>
-    </div>
+    <div id="game-container"></div>
 
     <script>
         window.RufflePlayer = window.RufflePlayer || {};
         window.addEventListener("load", () => {
-            window.RufflePlayer.config = {
-                autoplay: "auto",
-                unmuteOverlay: "hidden",
-                maxExecutionDuration: 120,
-                quality: "high",
-                letterbox: "off",
-                allowScriptAccess: "always",
-                backgroundColor: "#000000",
-                wmode: "direct",
-                scale: "exactfit",
-                forceScale: true,
-                logLevel: "error",
-                showSwfDownload: false,
-                contextMenu: false,
-                upgradeToHttps: true,
-                preloader: false
-            };
-            
-            // Create and configure the player
             const ruffle = window.RufflePlayer.newest();
             const player = ruffle.createPlayer();
-            const container = document.getElementById("ruffle-player");
+            const container = document.getElementById("game-container");
+            
+            player.style.width = "100%";
+            player.style.height = "100%";
             container.appendChild(player);
             
-            // Configure player size
-            player.style.width = '100%';
-            player.style.height = '100%';
+            try {
+                player.load("swf/Mama Vana.swf");
+            } catch (e) {
+                console.error(e);
+                container.innerHTML = "Failed to load the game. Please try a different browser.";
+            }
+        });
             
-            // Load the SWF with a slight delay to ensure proper initialization
-            setTimeout(() => {
-                player.load({
-                    url: "swf/Mama Vana.swf",
-                    parameters: {
-                        allowScriptAccess: true,
-                        base: ".",
-                        menu: false,
-                        quality: "high",
-                        bgcolor: "#000000"
-                    }
-                }).catch((e) => {
-                    console.error("Loading error:", e);
-                    // Try reloading once if there's an error
-                    setTimeout(() => {
-                        player.load("swf/Mama Vana.swf").catch(console.error);
-                    }, 1000);
-                });
-            }, 500);
-            
-            // Add error handling and loading monitoring
-            player.addEventListener('error', (e) => {
-                console.error("Ruffle error:", e);
-            });
-            
-            player.addEventListener('loadProgress', (e) => {
-                console.log("Loading progress:", e.detail);
-            });
-            
-            // Force reload if stuck for too long
-            setTimeout(() => {
-                if (document.querySelector("#ruffle-player").innerHTML.includes("Loading")) {
-                    console.log("Attempting reload due to long load time...");
-                    player.load("swf/Mama Vana.swf");
-                }
-            }, 10000);
+            // Let's check if Ruffle loaded properly
+            if (typeof window.RufflePlayer === "undefined") {
+                document.body.innerHTML = "Ruffle failed to load. Please check if your browser supports WebAssembly.";
+            }
         });
         
         // Check if Ruffle is supported
