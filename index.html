@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SWF Game Player</title>
+    <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #1a1a1a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        #app-container {
+            background-color: white;
+            max-width: 932px;
+            width: 100%;
+            height: 100vh;
+            border-radius: 40px;
+            box-shadow: 0 0 24px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            position: relative;
+        }
+
+        #portrait-message {
+            display: none;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #portrait-message h1 {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        #landscape-content {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            background-color: white;
+        }
+
+        #left-image, #right-image {
+            height: 100%;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .swf-container {
+            height: 100%;
+            aspect-ratio: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        embed {
+            height: 100%;
+            aspect-ratio: 1;
+            max-height: 100vh;
+        }
+
+        @media (orientation: portrait) {
+            #left-image, #right-image {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app-container">
+        <div id="portrait-message">
+            <h1>Please rotate your phone</h1>
+        </div>
+        <div id="landscape-content">
+            <img id="left-image" src="assets/left_image.png" alt="Left decoration">
+            <div class="swf-container">
+                <embed
+                    type="application/x-shockwave-flash"
+                    src="swf/Mama Vana.swf"
+                    width="100%"
+                    height="100%"
+                    quality="high"
+                    scale="exactfit"
+                    allowfullscreen="true"
+                    allowscriptaccess="always"
+                    wmode="direct"
+                />
+            </div>
+            <img id="right-image" src="assets/right_image.png" alt="Right decoration">
+        </div>
+    </div>
+
+    <script>
+        const portraitMessage = document.getElementById('portrait-message');
+        const landscapeContent = document.getElementById('landscape-content');
+
+        function checkOrientation() {
+            const isLandscape = window.innerWidth > window.innerHeight;
+            
+            if (isLandscape) {
+                portraitMessage.style.display = 'none';
+                landscapeContent.style.display = 'flex';
+            } else {
+                portraitMessage.style.display = 'flex';
+                landscapeContent.style.display = 'none';
+            }
+        }
+
+        // Check orientation on page load
+        checkOrientation();
+
+        // Check orientation on rotation
+        window.addEventListener('orientationchange', () => {
+            setTimeout(checkOrientation, 100); // Small delay to ensure proper calculation
+        });
+
+        // Also check on resize for testing in desktop browsers
+        window.addEventListener('resize', checkOrientation);
+    </script>
+</body>
+</html>
