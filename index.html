@@ -1,109 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mama Vana</title>
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100vh;
-            background-color: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        #game-container {
-            width: 800px;
-            height: 600px;
-            position: relative;
-            background: #000;
-        }
-
-        #rotate-message {
-            display: none;
-            color: white;
-            text-align: center;
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            font-size: 24px;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 100%;
-            z-index: 1000;
-        }
-
-        embed {
-            width: 100%;
-            height: 100%;
-        }
-
-        @media (max-width: 800px) {
-            #game-container {
-                width: 100vw;
-                height: 75vw;
-                max-height: 100vh;
-            }
-        }
-
-        @media (orientation: portrait) {
-            #game-container { display: none; }
-            #rotate-message { display: block; }
-        }
-
-        @media (orientation: landscape) {
-            #game-container { display: block; }
-            #rotate-message { display: none; }
-        }
+        body { margin: 0; overflow: hidden; }
+        embed, object { width: 100vw; height: 100vh; }
     </style>
-    <script src="https://unpkg.com/@ruffle-rs/ruffle@0.1.0-nightly.2023.08.15/ruffle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@ruffle-rs/ruffle@0.1.0/ruffle.min.js"></script>
 </head>
 <body>
-    <div id="rotate-message">
-        Please rotate your device to landscape mode to play
+    <div id="game-container">
+        <embed src="Mama_Vana.swf" width="100%" height="100%">
     </div>
-    <div id="game-container"></div>
-
-    <script>
-        window.RufflePlayer = window.RufflePlayer || {};
-        window.addEventListener("load", () => {
-            const ruffle = window.RufflePlayer.newest();
-            const player = ruffle.createPlayer();
-            const container = document.getElementById("game-container");
-            
-            player.style.width = "100%";
-            player.style.height = "100%";
-            container.appendChild(player);
-            
-            try {
-                player.load("swf/Mama Vana.swf");
-            } catch (e) {
-                console.error(e);
-                container.innerHTML = "Failed to load the game. Please try a different browser.";
-            }
-        });
-            
-            // Let's check if Ruffle loaded properly
-            if (typeof window.RufflePlayer === "undefined") {
-                document.body.innerHTML = "Ruffle failed to load. Please check if your browser supports WebAssembly.";
-            }
-        });
-        
-        // Check if Ruffle is supported
-        if (typeof window.RufflePlayer === "undefined") {
-            const errorMessage = document.createElement("div");
-            errorMessage.style.color = "white";
-            errorMessage.style.textAlign = "center";
-            errorMessage.style.padding = "20px";
-            errorMessage.innerHTML = "Ruffle failed to load. Please check if your browser supports WebAssembly.";
-            document.body.appendChild(errorMessage);
-        }
-    </script>
 </body>
 </html>
