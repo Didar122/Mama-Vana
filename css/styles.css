@@ -131,6 +131,13 @@ body {
     padding: 1rem;
     background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(5px);
+    z-index: 1000;
+}
+
+.mobile-controls.visible {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .d-pad {

@@ -2,18 +2,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const ruffle = window.RufflePlayer.newest();
     const player = ruffle.createPlayer();
     const playerContainer = document.getElementById('ruffle-player');
-    const playButton = document.getElementById('play-button');
     const controllerToggle = document.getElementById('controller-toggle-btn');
     const mobileControls = document.getElementById('mobile-controls');
     
     // Replace this path with your actual .swf file path
     const swfPath = 'assets/swf/Mama_Vana.swf';
     
-    playButton.addEventListener('click', function() {
-        playerContainer.appendChild(player);
-        player.load(swfPath);
-        playButton.style.display = 'none';
-    });
+    // Initialize player immediately
+    playerContainer.appendChild(player);
+    player.load(swfPath);
     
     // Mobile controls toggle
     controllerToggle.addEventListener('click', function() {
