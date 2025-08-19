@@ -1,0 +1,227 @@
+:root {
+    --primary-bg: #1a1a1a;
+    --secondary-bg: #2a2a2a;
+    --text-color: #ffffff;
+    --button-bg: #3a3a3a;
+    --button-hover: #4a4a4a;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background-color: var(--primary-bg);
+    color: var(--text-color);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+    flex: 1;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+}
+
+.logo {
+    height: 40px;
+    width: auto;
+}
+
+.control-btn {
+    background: var(--button-bg);
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.control-btn:hover {
+    background: var(--button-hover);
+}
+
+.controller-icon {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    position: relative;
+}
+
+.controller-icon::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 16px;
+    height: 10px;
+    border: 2px solid #fff;
+    border-radius: 4px;
+}
+
+.controller-icon::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 6px;
+    height: 6px;
+    background: #fff;
+    border-radius: 50%;
+}
+
+.game-container {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    margin: 2rem auto;
+    background: var(--secondary-bg);
+    border-radius: 12px;
+    box-shadow: 0 4px 6px var(--shadow-color);
+    aspect-ratio: 4/3;
+    overflow: hidden;
+}
+
+#ruffle-player {
+    width: 100%;
+    height: 100%;
+}
+
+.play-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--button-bg);
+    color: var(--text-color);
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+    z-index: 10;
+}
+
+.play-button:hover {
+    background: var(--button-hover);
+}
+
+.mobile-controls {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+}
+
+.d-pad {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    float: left;
+}
+
+.d-pad button {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background: var(--button-bg);
+    border: none;
+    border-radius: 8px;
+}
+
+.d-pad-up { top: 0; left: 50px; }
+.d-pad-right { top: 50px; right: 0; }
+.d-pad-down { bottom: 0; left: 50px; }
+.d-pad-left { top: 50px; left: 0; }
+
+.action-buttons {
+    float: right;
+    display: flex;
+    gap: 1rem;
+}
+
+.action-btn {
+    width: 60px;
+    height: 60px;
+    background: var(--button-bg);
+    border: none;
+    border-radius: 50%;
+    color: var(--text-color);
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+#rotate-message {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--primary-bg);
+    color: var(--text-color);
+    text-align: center;
+    padding: 2rem;
+    z-index: 1000;
+}
+
+.rotate-icon {
+    width: 64px;
+    height: 64px;
+    margin: 2rem auto;
+    font-size: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: rotate 2s infinite linear;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 768px) {
+    .mobile-controls.visible {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    @media (orientation: portrait) {
+        .game-container {
+            display: none;
+        }
+        
+        #rotate-message {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+    }
+}

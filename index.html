@@ -3,371 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SWF Player with On-screen Controls</title>
-    <!-- Ruffle.js CDN link - a modern flash player emulator -->
+    <title>Ruffle Flash Player</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" type="image/png" href="assets/images/icon.png">
+    <link rel="apple-touch-icon" href="assets/images/apple-touch-icon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0d1117;
-            color: #c9d1d9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            overflow: hidden;
-            flex-direction: column; /* Allows vertical stacking */
-        }
-
-        .main-container {
-            position: relative;
-            width: 90vw; /* Use a larger percentage for better responsiveness */
-            max-width: 1000px;
-            aspect-ratio: 4 / 3; /* Maintain aspect ratio for the game screen */
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
-            background-color: #161b22;
-        }
-
-        #ruffle-player {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-
-        #play-button {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 1rem 3rem;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: white;
-            background: linear-gradient(to right, #6b46c1, #805ad5);
-            border: none;
-            border-radius: 9999px;
-            cursor: pointer;
-            z-index: 10;
-            box-shadow: 0 4px 14px rgba(128, 90, 213, 0.5);
-            transition: all 0.2s ease-in-out;
-        }
-
-        #play-button:hover {
-            transform: translate(-50%, -50%) scale(1.05);
-            box-shadow: 0 6px 20px rgba(128, 90, 213, 0.7);
-        }
-
-        .top-buttons {
-            position: absolute;
-            top: 10px;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 10px;
-            box-sizing: border-box;
-            z-index: 5;
-        }
-        
-        #controller-toggle-btn, .controller-btn {
-            background-color: #21262d;
-            border: 1px solid #30363d;
-            color: white;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            font-size: 1.5rem;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            transition: background-color 0.2s;
-        }
-
-        #controller-toggle-btn:hover, .controller-btn:hover {
-            background-color: #30363d;
-        }
-
-        #controller-toggle-btn {
-            font-size: 2rem;
-            line-height: 0;
-            padding-bottom: 5px;
-        }
-
-        .controller-container {
-            position: absolute;
-            bottom: 20px;
-            width: 100%; /* Take full width of the main container */
-            display: none; /* Initially hidden */
-            flex-direction: row;
-            justify-content: space-between; /* Position buttons left and right */
-            align-items: center;
-            padding: 0 20px;
-            box-sizing: border-box;
-            z-index: 5;
-            background-color: rgba(22, 27, 34, 0.8);
-            backdrop-filter: blur(5px);
-            border-radius: 12px;
-            border: 1px solid #30363d;
-            transition: transform 0.3s ease-in-out;
-        }
-
-        .controller-container.active {
-            display: flex; /* Show when active */
-        }
-        
-        .d-pad {
-            display: grid;
-            grid-template-areas:
-                ". up ."
-                "left center right"
-                ". down .";
-            width: 150px;
-            height: 150px;
-            background-color: #161b22;
-            border-radius: 12px;
-            border: 1px solid #30363d;
-            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
-            overflow: hidden;
-        }
-
-        .d-pad-btn {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #21262d;
-            border: 1px solid #30363d;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .d-pad-btn:hover {
-            background-color: #30363d;
-        }
-        
-        .d-pad-up { grid-area: up; }
-        .d-pad-left { grid-area: left; }
-        .d-pad-right { grid-area: right; }
-        .d-pad-down { grid-area: down; }
-        .d-pad-center { grid-area: center; visibility: hidden; }
-
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-        }
-
-        .action-buttons .controller-btn {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-        }
-
-        .logo-placeholder {
-            width: 80px; /* Increased size */
-            height: 80px; /* Increased size */
-            border-radius: 50%;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        .logo-placeholder img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        /* Message for mobile portrait mode */
-        #rotate-message {
-            display: none; /* Initially hidden */
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 20px;
-            background-color: #161b22;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        #rotate-message .icon {
-            font-size: 4rem;
-            margin-bottom: 10px;
-        }
-        
-        #error-message {
-            display: none;
-            text-align: center;
-            font-size: 1.2rem;
-            color: #e35a5a;
-            margin-top: 20px;
-            padding: 10px;
-            border: 2px solid #e35a5a;
-            border-radius: 8px;
-        }
-
-        /* Media query for mobile in portrait orientation */
-        @media screen and (orientation: portrait) and (max-width: 768px) {
-            .main-container, .controller-container {
-                display: none;
-            }
-            #rotate-message {
-                display: flex; /* Show the message */
-            }
-        }
-    </style>
 </head>
 <body>
+    <div class="container">
+        <div class="header">
+            <button id="controller-toggle-btn" class="control-btn">
+                <span class="controller-icon"></span>
+            </button>
+            <img src="assets/images/logo.png" alt="Logo" class="logo">
+        </div>
 
-<div id="rotate-message">
-    <span class="icon">&#x21BA;</span>
-    <p>Please rotate your phone to play the game!</p>
-</div>
+        <div id="rotate-message">
+            <p>Please rotate your device to landscape mode</p>
+            <div class="rotate-icon">⟳</div>
+        </div>
 
-<div class="main-container">
-    <div id="ruffle-player"></div>
-    <button id="play-button">Play Game</button>
-    <!-- Element to show the error message -->
-    <div id="error-message"></div>
+        <div class="game-container">
+            <div id="play-button" class="play-button">Play Game</div>
+            <div id="ruffle-player"></div>
+        </div>
 
-    <div class="top-buttons">
-        <!-- The button to toggle the controller pop-up -->
-        <button id="controller-toggle-btn">
-            &#8285;
-        </button>
-        <!-- Logo placeholder on the right side -->
-        <div class="logo-placeholder">
-            <img id="logo-img" src="https://placehold.co/80x80/30363D/90A4AE?text=LOGO" alt="Your Logo">
+        <div id="mobile-controls" class="mobile-controls">
+            <div class="d-pad">
+                <button class="d-pad-up" data-key="ArrowUp"></button>
+                <button class="d-pad-right" data-key="ArrowRight"></button>
+                <button class="d-pad-down" data-key="ArrowDown"></button>
+                <button class="d-pad-left" data-key="ArrowLeft"></button>
+            </div>
+            <div class="action-buttons">
+                <button class="action-btn x-btn" data-key="x">X</button>
+                <button class="action-btn o-btn" data-key="o">O</button>
+                <button class="action-btn play-btn" data-key="p">Play</button>
+            </div>
         </div>
     </div>
-    
-    <!-- The on-screen controller container -->
-    <div id="controller-container" class="controller-container">
-        <!-- D-pad (directional pad) on the left side -->
-        <div class="d-pad">
-            <button class="d-pad-btn d-pad-up" data-key="ArrowUp">&#9650;</button>
-            <button class="d-pad-btn d-pad-left" data-key="ArrowLeft">&#9664;</button>
-            <div class="d-pad-btn d-pad-center"></div>
-            <button class="d-pad-btn d-pad-right" data-key="ArrowRight">&#9654;</button>
-            <button class="d-pad-btn d-pad-down" data-key="ArrowDown">&#9660;</button>
-        </div>
-
-        <!-- Action buttons on the right side -->
-        <div class="action-buttons">
-            <button class="controller-btn" data-key="x">X</button>
-            <button class="controller-btn" data-key="o">O</button>
-        </div>
-    </div>
-</div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', async () => {
-        // --- 1. SETUP RUFFLE ---
-        // Configure Ruffle to disable autoplay, so we can control it with our button.
-        window.RufflePlayer = window.RufflePlayer || {};
-        window.RufflePlayer.config = {
-            autoplay: "off",
-            unmuteOverlay: "hidden", // Hides Ruffle's default play button
-        };
-
-        // --- 2. GET HTML ELEMENTS ---
-        const gameContainer = document.getElementById('ruffle-player');
-        const playButton = document.getElementById('play-button');
-        const controllerToggleButton = document.getElementById('controller-toggle-btn');
-        const controllerContainer = document.getElementById('controller-container');
-        const dPadButtons = document.querySelectorAll('.d-pad-btn');
-        const actionButtons = document.querySelectorAll('.action-buttons .controller-btn');
-        const logoImg = document.getElementById('logo-img');
-        const errorMessage = document.getElementById('error-message');
-
-        // --- 3. LOAD THE SWF PLAYER ---
-        // Create a new Ruffle player instance
-        const ruffle = window.RufflePlayer.newest();
-        const player = ruffle.createPlayer();
-        
-        // Append the player to the designated container
-        gameContainer.appendChild(player);
-
-        // --- IMPORTANT: FIX THE ERROR HERE ---
-        // The "Invalid URL" error occurs because Ruffle couldn't find the SWF file.
-        // You MUST replace "YOUR_GAME_FILE_NAME_HERE.swf" with the actual name
-        // of your Flash game file. Make sure the file is in the same folder as this HTML file.
-        const swfPath = "Mama_Vana.swf";
-
-        // Use a try/catch block to handle the file loading error gracefully
-        try {
-            await player.load(swfPath);
-        } catch (err) {
-            console.error(err);
-            errorMessage.textContent = "Error: Could not load the SWF file. Please ensure the file name is correct and in the same directory.";
-            errorMessage.style.display = 'block';
-            playButton.style.display = 'none'; // Hide the play button
-            return; // Exit the function to prevent further errors
-        }
-
-        // --- 4. BUTTON LOGIC ---
-        // Event listener for the main 'Play Game' button
-        playButton.addEventListener('click', () => {
-            // Use the Ruffle API to start the SWF playback
-            player.play();
-            // Hide the button so the user can see the game
-            playButton.style.display = 'none';
-        });
-
-        // Event listener to toggle the on-screen controller's visibility
-        controllerToggleButton.addEventListener('click', () => {
-            controllerContainer.classList.toggle('active');
-        });
-
-        // Optional: Replace the placeholder logo URL with your own PNG file.
-        // logoImg.src = "your_logo.png";
-        
-
-        // --- 5. CONTROLLER LOGIC (SIMULATING KEYPRESSES) ---
-        // Function to create and dispatch a keyboard event
-        function dispatchKey(key, type) {
-            const event = new KeyboardEvent(type, {
-                key: key,
-                code: key.startsWith('Arrow') ? key : 'Key' + key.toUpperCase(),
-                bubbles: true,
-                cancelable: true
-            });
-            // Dispatch the event to the document, simulating a key press
-            document.dispatchEvent(event);
-        }
-
-        // Add event listeners for d-pad buttons
-        dPadButtons.forEach(button => {
-            const key = button.dataset.key;
-            // On touch/mouse down, simulate a keydown event
-            button.addEventListener('mousedown', () => dispatchKey(key, 'keydown'));
-            button.addEventListener('touchstart', (e) => {
-                e.preventDefault(); // Prevent default touch behavior (e.g., scrolling)
-                dispatchKey(key, 'keydown');
-            });
-
-            // On touch/mouse up, simulate a keyup event
-            button.addEventListener('mouseup', () => dispatchKey(key, 'keyup'));
-            button.addEventListener('touchend', () => dispatchKey(key, 'keyup'));
-        });
-
-        // Add event listeners for action buttons (X, O)
-        actionButtons.forEach(button => {
-            const key = button.dataset.key;
-            button.addEventListener('mousedown', () => dispatchKey(key, 'keydown'));
-            button.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                dispatchKey(key, 'keydown');
-            });
-            button.addEventListener('mouseup', () => dispatchKey(key, 'keyup'));
-            button.addEventListener('touchend', () => dispatchKey(key, 'keyup'));
-        });
-
-    });
-</script>
+    <script src="js/main.js"></script>
 </body>
 </html>
