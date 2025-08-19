@@ -1,16 +1,27 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Prevent default touch behaviors
+    document.addEventListener('touchmove', function(e) {
+        e.preventDefault();
+    }, { passive: false });
+
+    document.addEventListener('gesturestart', function(e) {
+        e.preventDefault();
+    });
+
+    // Initialize Ruffle
     const ruffle = window.RufflePlayer.newest();
     const player = ruffle.createPlayer();
     const playerContainer = document.getElementById('ruffle-player');
     const controllerToggle = document.getElementById('controller-toggle-btn');
     const mobileControls = document.getElementById('mobile-controls');
     
-    // Replace this path with your actual .swf file path
-    const swfPath = 'assets/swf/Mama_Vana.swf';
+    // Configure player
+    player.style.width = '100%';
+    player.style.height = '100%';
     
-    // Initialize player immediately
+    // Load the SWF file
     playerContainer.appendChild(player);
-    player.load(swfPath);
+    player.load('assets/swf/Mama_Vana.swf');
     
     // Mobile controls toggle
     controllerToggle.addEventListener('click', function() {
