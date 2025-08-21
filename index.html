@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mama Vana</title>
+    <title>SWF Player</title>
     <!-- Link for the iPhone home screen icon -->
     <link rel="apple-touch-icon" href="icon.png">
     <!-- These lines make it a full-screen web app on iOS -->
@@ -132,13 +132,17 @@
             padding: 12px 20px;
             text-align: center;
             text-decoration: none;
-            display: inline-block;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             font-size: 16px;
-            margin: 4px 2px;
             cursor: pointer;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: background-color 0.3s, transform 0.2s;
+            width: 100px; /* Adjusting button size to be square-like */
+            height: 100px;
+            justify-content: center;
         }
 
         .toggle-btn:hover {
@@ -187,7 +191,10 @@
 
     <!-- Controller toggle button -->
     <div id="controller-toggle">
-        <button id="toggleBtn" class="toggle-btn">Controllers: OFF</button>
+        <button id="toggleBtn" class="toggle-btn">
+            <span>Controllers</span>
+            <span id="controller-status">OFF</span>
+        </button>
     </div>
 
     <!-- Container for the Ruffle player -->
@@ -229,6 +236,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             const toggleBtn = document.getElementById('toggleBtn');
             const controllerButtons = document.getElementById('controller-buttons');
+            const controllerStatus = document.getElementById('controller-status');
             const playBtn = document.getElementById('playBtn');
             let rufflePlayerInstance = null;
             
@@ -247,15 +255,27 @@
                 rufflePlayerInstance = player;
             });
 
+            // Handle window resize events to ensure the player fills the screen
+            window.addEventListener('resize', () => {
+                // Ruffle is designed to automatically handle resizing of its parent container.
+                // By ensuring the parent (`#player-container`) is always full screen,
+                // the Ruffle player will automatically adjust its size.
+                const container = document.getElementById('player-container');
+                container.style.width = window.innerWidth + 'px';
+                container.style.height = window.innerHeight + 'px';
+                // The `rufflePlayerInstance.play()` method is not a resizing method.
+                // The player should automatically handle resizing when its container size changes.
+            });
+
             // Controller toggle functionality
             toggleBtn.addEventListener('click', () => {
                 if (controllerButtons.classList.contains('active')) {
                     controllerButtons.classList.remove('active');
-                    toggleBtn.textContent = 'Controllers: OFF';
+                    controllerStatus.textContent = 'OFF';
                     toggleBtn.classList.remove('off');
                 } else {
                     controllerButtons.classList.add('active');
-                    toggleBtn.textContent = 'Controllers: ON';
+                    controllerStatus.textContent = 'ON';
                     toggleBtn.classList.add('off');
                 }
             });
