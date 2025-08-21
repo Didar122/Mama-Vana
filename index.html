@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SWF Player</title>
+    <!-- Link for the iPhone home screen icon -->
+    <link rel="apple-touch-icon" href="icon.png">
     <!-- Tailwind CSS CDN for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -32,12 +34,142 @@
             z-index: 10;
         }
 
+        #controller-toggle {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            z-index: 10;
+        }
+
+        #play-button-container {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            z-index: 10;
+        }
+
+        /* Controller Buttons Container */
+        #controller-buttons {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem;
+            z-index: 9;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none; /* Prevents interaction when hidden */
+        }
+        
+        #controller-buttons.active {
+            opacity: 1;
+            pointer-events: auto; /* Re-enable interaction when active */
+        }
+        
+        .d-pad {
+            display: grid;
+            grid-template-areas:
+                ". up ."
+                "left . right"
+                ". down .";
+            gap: 10px;
+            width: 200px; /* Sizing the d-pad container */
+            height: 200px;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .controller-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            transition: background-color 0.2s;
+        }
+
+        .controller-btn:active {
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+
+        #up-btn { grid-area: up; }
+        #down-btn { grid-area: down; }
+        #left-btn { grid-area: left; }
+        #right-btn { grid-area: right; }
+
         /* Prevent text selection */
         * {
             -webkit-user-select: none;  /* Safari */
             -moz-user-select: none;     /* Firefox */
             -ms-user-select: none;      /* IE10+ */
             user-select: none;          /* Standard syntax */
+        }
+
+        .toggle-btn {
+            background-color: #4CAF50; /* Green */
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .toggle-btn:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .toggle-btn.off {
+            background-color: #f44336; /* Red */
+        }
+        
+        .toggle-btn.off:hover {
+            background-color: #da190b;
+        }
+
+        .play-btn {
+            background-color: #008CBA; /* Blue */
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .play-btn:hover {
+            background-color: #007bb5;
+            transform: translateY(-2px);
         }
     </style>
     <!-- Ruffle.js CDN -->
@@ -47,7 +179,12 @@
 
     <!-- Logo placeholder -->
     <div id="logo">
-        <img src="iphone icon.png" alt="iPhone Icon" class="w-12 h-12 rounded-full">
+        <img src="logo.png" alt="Game Logo" class="w-12 h-12">
+    </div>
+
+    <!-- Controller toggle button -->
+    <div id="controller-toggle">
+        <button id="toggleBtn" class="toggle-btn">Controllers: OFF</button>
     </div>
 
     <!-- Container for the Ruffle player -->
@@ -56,6 +193,25 @@
         <object data="game.swf" width="100%" height="100%">
             <embed src="game.swf" width="100%" height="100%"></embed>
         </object>
+    </div>
+    
+    <!-- Play button -->
+    <div id="play-button-container">
+        <button id="playBtn" class="play-btn">Play</button>
+    </div>
+
+    <!-- Controller buttons -->
+    <div id="controller-buttons" class="hidden">
+        <div class="d-pad">
+            <button id="up-btn" class="controller-btn">▲</button>
+            <button id="down-btn" class="controller-btn">▼</button>
+            <button id="left-btn" class="controller-btn">◀</button>
+            <button id="right-btn" class="controller-btn">▶</button>
+        </div>
+        <div class="action-buttons">
+            <button id="x-btn" class="controller-btn">X</button>
+            <button id="o-btn" class="controller-btn">O</button>
+        </div>
     </div>
 
     <script>
@@ -68,6 +224,70 @@
             }
             lastTouchEnd = now;
         }, false);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleBtn = document.getElementById('toggleBtn');
+            const controllerButtons = document.getElementById('controller-buttons');
+            const playBtn = document.getElementById('playBtn');
+
+            // Controller toggle functionality
+            toggleBtn.addEventListener('click', () => {
+                if (controllerButtons.classList.contains('active')) {
+                    controllerButtons.classList.remove('active');
+                    toggleBtn.textContent = 'Controllers: OFF';
+                    toggleBtn.classList.remove('off');
+                } else {
+                    controllerButtons.classList.add('active');
+                    toggleBtn.textContent = 'Controllers: ON';
+                    toggleBtn.classList.add('off');
+                }
+            });
+
+            // "Play" button functionality
+            playBtn.addEventListener('click', () => {
+                const rufflePlayer = document.querySelector('object');
+                if (rufflePlayer) {
+                    // This function simulates the right-click "Play" action
+                    // It reloads the SWF file to restart the game
+                    const src = rufflePlayer.getAttribute('data');
+                    rufflePlayer.setAttribute('data', '');
+                    setTimeout(() => {
+                        rufflePlayer.setAttribute('data', src);
+                    }, 100);
+                    console.log('Game restarted/played.');
+                }
+            });
+
+            // Handle controller button presses for keyboard events
+            const mapButtonToKey = (key) => {
+                const event = new KeyboardEvent('keydown', {
+                    key: key,
+                    bubbles: true,
+                    cancelable: true,
+                    view: window
+                });
+                document.dispatchEvent(event);
+            };
+            
+            // Map touch events to keyboard keys
+            document.getElementById('up-btn').addEventListener('touchstart', (e) => { e.preventDefault(); mapButtonToKey('ArrowUp'); });
+            document.getElementById('up-btn').addEventListener('touchend', (e) => { e.preventDefault(); /* simulate keyup */ });
+            
+            document.getElementById('down-btn').addEventListener('touchstart', (e) => { e.preventDefault(); mapButtonToKey('ArrowDown'); });
+            document.getElementById('down-btn').addEventListener('touchend', (e) => { e.preventDefault(); /* simulate keyup */ });
+
+            document.getElementById('left-btn').addEventListener('touchstart', (e) => { e.preventDefault(); mapButtonToKey('ArrowLeft'); });
+            document.getElementById('left-btn').addEventListener('touchend', (e) => { e.preventDefault(); /* simulate keyup */ });
+
+            document.getElementById('right-btn').addEventListener('touchstart', (e) => { e.preventDefault(); mapButtonToKey('ArrowRight'); });
+            document.getElementById('right-btn').addEventListener('touchend', (e) => { e.preventDefault(); /* simulate keyup */ });
+            
+            document.getElementById('x-btn').addEventListener('touchstart', (e) => { e.preventDefault(); mapButtonToKey('x'); });
+            document.getElementById('x-btn').addEventListener('touchend', (e) => { e.preventDefault(); /* simulate keyup */ });
+
+            document.getElementById('o-btn').addEventListener('touchstart', (e) => { e.preventDefault(); mapButtonToKey('o'); });
+            document.getElementById('o-btn').addEventListener('touchend', (e) => { e.preventDefault(); /* simulate keyup */ });
+        });
     </script>
 </body>
 </html>
