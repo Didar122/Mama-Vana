@@ -193,9 +193,7 @@
     <!-- Container for the Ruffle player -->
     <div id="player-container">
         <!-- The SWF content will be loaded here -->
-        <object data="game.swf" width="100%" height="100%">
-            <embed src="game.swf" width="100%" height="100%"></embed>
-        </object>
+        <div id="ruffle-container"></div>
     </div>
     
     <!-- Play button -->
@@ -232,6 +230,22 @@
             const toggleBtn = document.getElementById('toggleBtn');
             const controllerButtons = document.getElementById('controller-buttons');
             const playBtn = document.getElementById('playBtn');
+            let rufflePlayerInstance = null;
+            
+            // Wait for Ruffle to be ready, then load the SWF
+            window.RufflePlayer = window.RufflePlayer || {};
+            window.RufflePlayer.config = {
+                autoplay: 'off', // Set autoplay to off so we can control it with the button
+                force_root_movie_autoplay: false
+            };
+            
+            window.addEventListener("load", () => {
+                const ruffle = window.RufflePlayer.newest();
+                const player = ruffle.createPlayer();
+                document.getElementById('ruffle-container').appendChild(player);
+                player.load("game.swf");
+                rufflePlayerInstance = player;
+            });
 
             // Controller toggle functionality
             toggleBtn.addEventListener('click', () => {
@@ -248,16 +262,9 @@
 
             // "Play" button functionality
             playBtn.addEventListener('click', () => {
-                const rufflePlayer = document.querySelector('object');
-                if (rufflePlayer) {
-                    // This function simulates the right-click "Play" action
-                    // It reloads the SWF file to restart the game
-                    const src = rufflePlayer.getAttribute('data');
-                    rufflePlayer.setAttribute('data', '');
-                    setTimeout(() => {
-                        rufflePlayer.setAttribute('data', src);
-                    }, 100);
-                    console.log('Game restarted/played.');
+                if (rufflePlayerInstance) {
+                    rufflePlayerInstance.play();
+                    console.log('Game play requested via Ruffle API.');
                 }
             });
 
