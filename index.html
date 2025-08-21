@@ -2,344 +2,72 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- Viewport settings to disable zooming and scaling on mobile -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, shrink-to-fit=no">
-    <title>Mobile SWF Player</title>
-
-    <!-- App icon for iPhone home screen -->
-    <!-- You should place your app icon file at the root level as icon.png -->
-    <link rel="apple-touch-icon" href="icon.png">
-    <link rel="icon" href="icon.png">
-
-    <!-- Ruffle Flash Emulator -->
-    <script src="https://unpkg.com/ruffle-web@0.1.0/ruffle.js"></script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SWF Player</title>
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* General styling for the entire body */
-        body, html {
+        /* Custom styles for a full-screen, minimalist look */
+        html, body {
             margin: 0;
             padding: 0;
-            background-color: #1a1a1a;
-            color: #fff;
-            font-family: 'Arial', sans-serif;
-            overflow: hidden; /* Prevents scrolling */
-            -webkit-user-select: none; /* Disable text selection on WebKit browsers */
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-
-        /* Main container using Flexbox for perfect centering */
-        .container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100vw;
-            height: 100vh;
-            position: relative;
-        }
-
-        /* Game and button layout using Flexbox */
-        .game-layout {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
             width: 100%;
-        }
-
-        /* SWF Player styling */
-        .swf-player {
-            position: relative;
-            background-color: #000;
-            width: 600px;
-            height: 600px; /* Square dimensions for a square SWF file */
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            height: 100%;
+            overflow: hidden; /* This disables scrolling */
+            background-color: #000; /* Black background for the player */
         }
         
-        /* Message box for loading/errors */
-        #message-box {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 20px 40px;
-            background-color: rgba(0, 0, 0, 0.7);
-            border-radius: 10px;
-            font-size: 1.2rem;
-            text-align: center;
-            z-index: 5; /* Ensure it's on top of the player */
-        }
-
-        /* Controls container styling */
-        .controls-container {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        /* Button styling */
-        .control-button {
-            width: 60px;
-            height: 60px;
-            margin: 10px;
-            background-color: #444;
-            border: none;
-            border-radius: 50%;
-            color: #fff;
-            font-size: 24px;
-            font-weight: bold;
+        #player-container {
+            width: 100%;
+            height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            cursor: pointer;
-            transition: transform 0.1s ease;
-        }
-        
-        .control-button.play {
-            border-radius: 10px;
-            width: 80px;
-            height: 80px;
-            font-size: 18px;
-        }
-
-        .control-button:active {
-            transform: scale(0.95);
-        }
-
-        /* D-pad specific styling */
-        .d-pad {
-            display: grid;
-            grid-template-areas:
-                ". up ."
-                "left . right"
-                ". down .";
-            width: 180px;
-            height: 180px;
-            margin-right: 40px; /* Space between D-pad and SWF player */
-        }
-        .d-pad .button {
-            width: 60px;
-            height: 60px;
-        }
-        .d-pad .up { grid-area: up; }
-        .d-pad .left { grid-area: left; }
-        .d-pad .right { grid-area: right; }
-        .d-pad .down { grid-area: down; }
-
-        /* Action buttons styling */
-        .action-buttons {
-            display: flex;
-            flex-direction: column;
-            margin-left: 40px; /* Space between action buttons and SWF player */
-        }
-
-        /* Toggle and logo styling */
-        .top-bar {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            right: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 10;
-        }
-
-        #toggle-controls {
-            width: 80px;
-            height: 40px;
-            background-color: #555;
-            border: none;
-            border-radius: 20px;
-            color: #fff;
-            font-size: 14px;
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         #logo {
-            height: 40px;
-            width: auto;
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 10;
         }
 
-        /* Responsive adjustments for smaller screens */
-        @media (max-width: 1024px) {
-            .game-layout {
-                flex-direction: column;
-                justify-content: space-around;
-            }
-            .d-pad, .action-buttons {
-                margin: 20px 0;
-            }
-            .d-pad {
-                width: 150px;
-                height: 150px;
-            }
-            .d-pad .button, .action-buttons .control-button {
-                width: 50px;
-                height: 50px;
-                font-size: 20px;
-            }
-            .control-button.play {
-                width: 60px;
-                height: 60px;
-                font-size: 16px;
-            }
+        /* Prevent text selection */
+        * {
+            -webkit-user-select: none;  /* Safari */
+            -moz-user-select: none;     /* Firefox */
+            -ms-user-select: none;      /* IE10+ */
+            user-select: none;          /* Standard syntax */
         }
     </style>
+    <!-- Ruffle.js CDN -->
+    <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
 </head>
 <body>
 
-    <div class="container">
-        <!-- Top bar with toggle button and logo -->
-        <div class="top-bar">
-            <button id="toggle-controls">Disable</button>
-            <img id="logo" src="logo.png" alt="Logo">
-        </div>
+    <!-- Logo placeholder -->
+    <div id="logo">
+        <img src="iphone icon.png" alt="iPhone Icon" class="w-12 h-12 rounded-full">
+    </div>
 
-        <!-- Main game and controls layout -->
-        <div class="game-layout">
-            <!-- D-pad controls (left side) -->
-            <div class="controls-container">
-                <div class="d-pad" id="d-pad">
-                    <button class="control-button button up" data-key="ArrowUp">▲</button>
-                    <button class="control-button button left" data-key="ArrowLeft">◀</button>
-                    <button class="control-button button right" data-key="ArrowRight">▶</button>
-                    <button class="control-button button down" data-key="ArrowDown">▼</button>
-                </div>
-            </div>
-
-            <!-- SWF player container -->
-            <div class="swf-player" id="swf-container">
-                <!-- Loading/Error message box -->
-                <div id="message-box">Loading...</div>
-                <!-- Ruffle will dynamically load the game here -->
-            </div>
-
-            <!-- Action buttons (right side) -->
-            <div class="controls-container">
-                <div class="action-buttons" id="action-buttons">
-                    <button class="control-button" data-key="KeyX">X</button>
-                    <button class="control-button" data-key="KeyO">O</button>
-                    <button id="play-game-button" class="control-button play">Play Game</button>
-                </div>
-            </div>
-        </div>
+    <!-- Container for the Ruffle player -->
+    <div id="player-container">
+        <!-- The SWF content will be loaded here -->
+        <object data="game.swf" width="100%" height="100%">
+            <embed src="game.swf" width="100%" height="100%"></embed>
+        </object>
     </div>
 
     <script>
-        // Use a function to ensure Ruffle is ready before we proceed.
-        const loadRufflePlayer = () => {
-            // Check if Ruffle is loaded by verifying the RufflePlayer object exists.
-            if (typeof window.RufflePlayer !== 'undefined') {
-                const swfContainer = document.getElementById('swf-container');
-                const messageBox = document.getElementById('message-box');
-                
-                try {
-                    const ruffle = window.RufflePlayer.newest();
-                    const player = ruffle.createPlayer();
-                    
-                    const timeout = setTimeout(() => {
-                        messageBox.textContent = `Error: The game seems to be blocked by your browser. Please try running the file from a web server.`;
-                        console.error("Game loading timed out. This is often caused by a CORS error when running from a local file. Please use a local web server to fix this issue.");
-                    }, 5000); // 5-second timeout
-
-                    player.load('swf/game.swf')
-                        .then(() => {
-                            clearTimeout(timeout);
-                            messageBox.style.display = 'none';
-                            swfContainer.appendChild(player);
-                        })
-                        .catch(error => {
-                            clearTimeout(timeout);
-                            console.error("Failed to load SWF:", error);
-                            messageBox.textContent = `Error: Could not load game. Check the 'swf' folder and 'game.swf' file path.`;
-                        });
-                } catch (error) {
-                    console.error("Ruffle Player initialization failed:", error);
-                    messageBox.textContent = "Error: Ruffle player failed to initialize.";
-                }
-            } else {
-                // Ruffle is not ready, try again after a short delay
-                setTimeout(loadRufflePlayer, 100);
+        // JavaScript to disable double-tap to zoom
+        document.addEventListener('touchend', (event) => {
+            let lastTouchEnd = 0;
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
             }
-        };
-
-        // All other event listeners can be attached on DOMContentLoaded
-        document.addEventListener('DOMContentLoaded', () => {
-            // Get references to DOM elements
-            const toggleButton = document.getElementById('toggle-controls');
-            const dPad = document.getElementById('d-pad');
-            const actionButtons = document.getElementById('action-buttons');
-            let controlsEnabled = true;
-
-            /**
-             * Simulates a keyboard event for the game.
-             * @param {string} key - The key to simulate (e.g., 'ArrowUp', 'KeyX').
-             * @param {string} type - 'keydown' or 'keyup'.
-             */
-            const simulateKeyEvent = (key, type) => {
-                const event = new KeyboardEvent(type, {
-                    key: key.length === 1 ? key.toLowerCase() : key,
-                    code: key,
-                    bubbles: true,
-                    cancelable: true
-                });
-                window.dispatchEvent(event);
-            };
-
-            // Event listeners for D-pad and action buttons
-            const allButtons = [...dPad.querySelectorAll('button'), ...actionButtons.querySelectorAll('button')];
-            allButtons.forEach(button => {
-                if (button.dataset.key) {
-                    button.addEventListener('pointerdown', (e) => {
-                        e.preventDefault(); // Prevent default touch behavior
-                        if (controlsEnabled) {
-                            simulateKeyEvent(button.dataset.key, 'keydown');
-                        }
-                    });
-                    button.addEventListener('pointerup', (e) => {
-                        e.preventDefault();
-                        if (controlsEnabled) {
-                            simulateKeyEvent(button.dataset.key, 'keyup');
-                        }
-                    });
-                    button.addEventListener('pointerleave', (e) => {
-                        e.preventDefault();
-                        if (controlsEnabled) {
-                            simulateKeyEvent(button.dataset.key, 'keyup');
-                        }
-                    });
-                }
-            });
-
-            // Toggle button functionality
-            toggleButton.addEventListener('click', () => {
-                controlsEnabled = !controlsEnabled;
-                toggleButton.textContent = controlsEnabled ? 'Disable' : 'Enable';
-                dPad.style.visibility = controlsEnabled ? 'visible' : 'hidden';
-                actionButtons.style.visibility = controlsEnabled ? 'visible' : 'hidden';
-            });
-            
-            // Re-added 'Play Game' button functionality
-            const playButton = document.getElementById('play-game-button');
-            playButton.addEventListener('click', () => {
-                // This simulates a click on the SWF canvas itself, which often starts the game.
-                const ruffleCanvas = document.querySelector('#swf-container canvas, #swf-container embed');
-                if (ruffleCanvas) {
-                    ruffleCanvas.click();
-                }
-            });
-
-            // Start the loading process
-            loadRufflePlayer();
-        });
+            lastTouchEnd = now;
+        }, false);
     </script>
 </body>
 </html>
